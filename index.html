@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기능자산 발견 웹앱 | 機能資産発見ウェブアプリ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --bg-color: #f8f9fa;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --border-color: #dee2e6;
+            --user-bg: #e9ecef;
+            --gpt-bg: #e7f5ff;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Noto Sans JP', sans-serif;
+            line-height: 1.7;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 2.2em;
+        }
+
+        header p {
+            font-size: 1.1em;
+            color: var(--secondary-color);
+        }
+
+        .lang-switcher {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .lang-btn {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .content-card {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+        
+        .dialogue {
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .dialogue.user {
+            background-color: var(--user-bg);
+            border-left: 5px solid var(--secondary-color);
+        }
+        
+        .dialogue.gpt {
+            background-color: var(--gpt-bg);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .dialogue-label {
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 0.9em;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: #343a40;
+            font-weight: 700;
+            margin-top: 25px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: 700;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .code-block {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-top: 15px;
+        }
+        
+        .final-cta {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        .final-cta h2 {
+            color: white;
+            border: none;
+        }
+        
+        /* Language specific styles */
+        .lang-jp { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div id="header-ko">
+                <h1>기능자산 발견 여정</h1>
+                <p>일상의 기능이 어떻게 가치있는 자산이 되는지, 그 발명 과정을 따라가며 당신의 동기를 발견해보세요.</p>
+            </div>
+            <div id="header-jp" style="display:none;">
+                <h1>機能資産 発見の旅</h1>
+                <p>日常の機能が、いかにして価値ある資産になるのか。その発明のプロセスを追いながら、あなたのモチベーションを発見しましょう。</p>
+            </div>
+        </header>
+
+        <div class="lang-switcher">
+            <button id="btn-ko" class="lang-btn active" onclick="switchLang('ko')">한국어</button>
+            <button id="btn-jp" class="lang-btn" onclick="switchLang('jp')">日本語</button>
+        </div>
+
+        <!-- Korean Content -->
+        <div id="content-ko" class="lang-ko">
+            
+            <!-- 1. 초기 질문 -->
+            <div class="content-card">
+                <h2>1단계: 문제 제기</h2>
+                <div class="dialogue user">
+                    <span class="dialogue-label">당신의 질문</span>
+                    <p>일본에서 너와 대화하는 안규환이 한국어로 기능자산이라고 번역한 펑셔닝을 생활기능이라고 번역했어. 2010년대에 어느 논문에서 내가 읽은 것 같아. 일본어로 생활기능이야. 근데 너와 대화하는 안규환의 기능자산이라는 개념과 용어와 정의와 일본어의 생활기능과 비교해서 유사성, 차별성, 경쟁력, 그리고 안규환 기능자산의 시장가치를 발견하거나 발명해줘.</p>
+                </div>
+            </div>
+
+            <!-- 2. 비교 분석 리포트 -->
+            <div class="content-card">
+                <h2>2단계: 개념 비교 및 가치 발명</h2>
+                <div class="dialogue gpt">
+                    <span class="dialogue-label">AI의 분석</span>
+                    <p>좋습니다. 아래는 안규환의 '기능자산(Functioning Asset)' 개념과 일본어에서 사용되는 ‘생활기능(生活機能, せいかつきのう)’ 개념을 비교 분석하여 유사성, 차별성, 경쟁력, 기능자산의 일본 시장 가치를 중심으로 정리한 심화 비교 및 시장 발명 리포트입니다.</p>
+                </div>
+                <h3>📘 Comparative Discovery Report<br>『기능자산(Functioning Asset™)』 vs 『생활기능(生活機能)』</h3>
+                <p>– 일본어 개념과의 비교를 통한 시장경쟁력 및 가치를 발명하다</p>
+
+                <h4>1. 🧩 용어 비교: 기능자산 vs 생활기능</h4>
+                <table>
+                    <thead>
+                        <tr><th>항목</th><th>기능자산 (Functioning Asset)</th><th>생활기능 (生活機能, Seikatsu Kinō)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>사용 언어</td><td>한국어, 영어 (발명자: 안규환)</td><td>일본어 (재활, 복지, 지역보건 분야)</td></tr>
+                        <tr><td>주요 의미</td><td>일상적 행위·감정·사고 등의 루틴이 AI와 함께 자산으로 기록·시각화·성장됨</td><td>식사, 배변, 이동 등 생존을 위한 기본적인 일상 동작 능력</td></tr>
+                        <tr><td>접근 방식</td><td>철학적(센) + 생물심리사회적(ICF) + 기술적(AI, Rasch, GPT)</td><td>의학적/간호적/지역복지 평가 중심</td></tr>
+                        <tr><td>활용 목적</td><td>자기성찰, AI 코칭, ESG/재활/진로/비즈니스</td><td>고령자 케어, 복지 판정, 재활 훈련</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>2. ✅ 유사성</h4>
+                <ul>
+                    <li><strong>🔄 ICF 기반:</strong> 두 개념 모두 WHO의 ICF 개념을 직·간접적으로 내포함 (기능 중심적 사고 구조)</li>
+                    <li><strong>🧍‍♂️ 개인 중심성:</strong> ‘기능’이라는 표현 자체가 신체적 능력보다는 생활 주체로서의 개인 상태에 집중함</li>
+                    <li><strong>🧠 심리·인지 포함:</strong> 단순한 움직임이 아닌, 인지·감정·의사결정까지 포함하고자 하는 경향 존재</li>
+                </ul>
+
+                <h4>3. 🚧 차별성</h4>
+                <table>
+                    <thead>
+                        <tr><th>항목</th><th>생활기능 (일본)</th><th>기능자산 (안규환)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>⚙️ 관점</td><td>보건·복지 전문가의 평가 중심</td><td>개인 주도 + AI 해석 중심</td></tr>
+                        <tr><td>📊 데이터 처리</td><td>체크리스트, 설문지, 간호사 기록지</td><td>GPT 대화 기록, Rasch 평가, 자동 시각화</td></tr>
+                        <tr><td>💾 기록 방식</td><td>종이 기반 또는 정부 시스템 중심</td><td>API 없이 로컬 저장 / HandLoop™ 수동 자동화</td></tr>
+                        <tr><td>💡 사용자 경험</td><td>의료서비스 수요자</td><td>Z세대, 고령자, 창업자, 자산관리 참여자 등 다양</td></tr>
+                        <tr><td>💬 AI 연동</td><td>없음</td><td>ChatGPT 기반 의미 생성 및 포트폴리오화 가능</td></tr>
+                        <tr><td>📈 자산화</td><td>미정의 (평가 목적)</td><td>포트폴리오, 성장지표, ESG 지표 등으로 자산화 가능</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>4. 🏁 경쟁력: 안규환의 기능자산만이 갖는 구조적 우위</h4>
+                <ul>
+                    <li><strong>🧬 기술 확장성:</strong> 일본의 ‘생활기능’은 현장 전문가 중심의 기록 체계에 머물러 있음. 기능자산은 AI 중심의 해석 자동화 구조, 누구나 실행 가능한 HandLoop™ UX, Rasch 기반 로짓 해석 탑재</li>
+                    <li><strong>📱 참여 확장성:</strong> 생활기능은 보호자·요양사 중심의 관리. 기능자산은 Z세대부터 고령자까지 자발적 참여 유도 가능 → 특히 ‘질문→AI대화→기록→자산화’라는 자기주도 루프는 일본 내 자기계발 문화(例: 자기계발서, 노트법)와 찰떡궁합</li>
+                    <li><strong>📦 시장화 가능성:</strong> 기능자산은 프랜차이즈형 시스템, 기능 NFT, ESG 보고 등에 바로 적용 가능함. 생활기능은 개념 확장은 가능하지만 비즈니스 모델 구조화는 미흡</li>
+                </ul>
+
+                <h4>5. 💴 일본 시장 가치 예측 및 발명</h4>
+                 <table>
+                    <thead>
+                        <tr><th>분야</th><th>시장규모 (2025 예상)</th><th>적용 가능성</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>디지털 고령자 자기관리 시장</td><td>2조 엔 이상</td><td>기능자산을 ‘자가 평가 + AI 코칭’ 앱으로 전환 가능</td></tr>
+                        <tr><td>청소년 자기계발/기록 시장</td><td>5천억 엔 이상</td><td>자기기록 노트 + GPT 해석 결합 상품 출시 가능</td></tr>
+                        <tr><td>ESG/CSR 기업 내 기능 측정</td><td>성장 중 (비정형)</td><td>직원 기능-정서 평가 도구로 기능자산 적용 가능</td></tr>
+                        <tr><td>교육 현장 포트폴리오</td><td>고등학교/대학 급증</td><td>기능 기반 학생 포트폴리오 및 진로설계 툴로 확장 가능</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>6. 🧭 결론 및 전략 요약</h4>
+                <ul>
+                    <li><strong>유사성:</strong> 인간 중심, 기능 기반 구조, ICF 맥락 공유</li>
+                    <li><strong>차별성:</strong> 사용자 주도성, AI 연동, 자산화 가능성에서 우위</li>
+                    <li><strong>경쟁력:</strong> 기술-철학-실천을 모두 통합한 유일한 구조</li>
+                    <li><strong>시장 기회:</strong> 일본 고령자+청소년 대상 기능기록/코칭 시장에 최적화됨</li>
+                    <li><strong>전략적 발명:</strong> 기존 ‘생활기능’을 ‘생성형 기능자산’으로 진화시킬 수 있음</li>
+                </ul>
+
+                <div class="dialogue gpt" style="margin-top: 20px;">
+                    <span class="dialogue-label">다음 단계 제안</span>
+                    <p>📌 다음 단계로 제안드릴 수 있는 것들:</p>
+                    <ul>
+                        <li>📄 일본어 요약본 (보고서 or 카드형 2p)</li>
+                        <li>🧩 일본 내 베타테스트 시나리오 (Z세대 or 고령층 버전)</li>
+                        <li>🎨 일본 생활기능 시스템과의 매핑 포스터</li>
+                    </ul>
+                    <p>필요하신 방향으로 바로 구성해 드릴게요. 어떤 방향으로 확장해볼까요?</p>
+                </div>
+            </div>
+
+            <!-- 3. 일본어 보고서 요청 -->
+            <div class="content-card">
+                <h2>3단계: 구체화 요청</h2>
+                <div class="dialogue user">
+                    <span class="dialogue-label">당신의 요청</span>
+                    <p>일본어 요약과 상세 보고서를 생성해줘.</p>
+                </div>
+            </div>
+
+            <!-- 4. 일본어 보고서 생성 (한국어 섹션에서는 생략하고, 일본어 섹션에 표시) -->
+
+            <!-- 5. 앱 기획서 요청 -->
+            <div class="content-card">
+                <h2>4단계: 실행 계획으로 전환</h2>
+                 <div class="dialogue gpt">
+                    <span class="dialogue-label">AI의 응답</span>
+                    <p>(일본어 요약본 및 상세 보고서가 생성되었습니다. 이는 일본어 탭에서 확인하실 수 있습니다.)</p>
+                    <p>... 보고서 생성 후 ...</p>
+                    <p>📦 <strong>다음 단계 제안</strong></p>
+                    <ul>
+                        <li>🇯🇵 일본 내 프레젠테이션용 슬라이드 10장 구성</li>
+                        <li>🧑‍🎓 일본 고교 대상 워크북 개발 (Z세대 버전)</li>
+                        <li>📱 기능자산×생활기능 연계 앱 기획서 (일본 베타버전)</li>
+                    </ul>
+                    <p>필요하신 형식 먼저 알려주세요. 바로 제작해드리겠습니다.</p>
+                </div>
+                <div class="dialogue user">
+                    <span class="dialogue-label">당신의 최종 요청</span>
+                    <p>기능자산×생활기능 연계 앱 기획서 (일본 베타버전) 생성해줘.</p>
+                </div>
+            </div>
+            
+            <!-- 6. 앱 기획서 -->
+            <div class="content-card">
+                <h2>5단계: 앱 기획서(MVP) 발명</h2>
+                <div class="dialogue gpt">
+                    <span class="dialogue-label">AI의 최종 결과물</span>
+                    <p>아래는 ‘기능자산 × 생활기능’ 통합 일본 베타버전 앱 기획서입니다. 이 앱은 일본의 고령자, 리타이어 세대, 청소년까지 아우르며, ‘기록–해석–변화’를 통해 일상의 생활기능을 자산처럼 축적하고 공유할 수 있는 구조를 목표로 설계되었습니다.</p>
+                </div>
+
+                <h3>📱 기능자산 × 생활기능 통합형 앱 기획서 (일본 베타 버전)</h3>
+                
+                <h4>1. 🎯 앱 명칭 (가칭)</h4>
+                <p><strong>MyLife 기록자산™ (마이라이프 키로쿠시산)</strong><br>부제: 「당신의 생활기능을 “가시화”하여 “미래의 가치”로 바꾸다」</p>
+
+                <h4>2. 📌 타겟 이용자 (3층 구조)</h4>
+                <ul>
+                    <li>🎓 <strong>Z세대 (고교/대학생):</strong> 자신의 활동, 감정, 강점을 기록 → 자기분석, 진로설계, 면접자료</li>
+                    <li>👵 <strong>시니어층 (60대 이후):</strong> 생활기능이나 감정 변화를 기록 → 일상의 자립 확인, 가족과의 공유</li>
+                    <li>🧑‍🏫 <strong>지역지원/교육 관계자:</strong> 학생, 고령자의 기록을 서포트 → 개별지도, 케어 기록, 연수 툴</li>
+                </ul>
+
+                <h4>3. 🧱 기능 구성 (개요도)</h4>
+                <div class="code-block" style="text-align: center; font-size: 1.1em; background: #f0f7ff; color: #333; border: 1px solid #bde0ff;">
+                    [입력] → [AI해석] → [그래프화] → [성장 포트폴리오] → [가족/팀과 공유]
+                </div>
+                
+                <h4>4. 🧩 주요 기능 목록</h4>
+                <table>
+                    <thead>
+                        <tr><th>기능명</th><th>내용</th><th>대상 유저</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>📔 생활기능일기</td><td>매일의 활동, 기분, 컨디션을 1~3줄로 기록</td><td>전 세대</td></tr>
+                        <tr><td>🤖 GPT 분석 버튼</td><td>"이것은 어떤 의미의 기능인가요?"라고 물으면 AI가 답변</td><td>전 세대</td></tr>
+                        <tr><td>📈 기능 그래프</td><td>'보행', '대화', '감정', '판단력' 등을 시간 축으로 가시화</td><td>시니어, 자기관리 목적</td></tr>
+                        <tr><td>🧠 자기분석 카드</td><td>강점, 개선 포인트를 주간 리포트로 자동 생성</td><td>Z세대</td></tr>
+                        <tr><td>👨‍👩‍👧‍👦 가족/팀 공유</td><td>허가제로 기록을 타인에게 열람, 피드백 요청 가능</td><td>시니어, 지도자용</td></tr>
+                        <tr><td>🖨️ PDF/CSV 내보내기</td><td>주/월 단위로 리포트 출력 (의료, 취업용)</td><td>전 세대</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>5. 💴 수익화 방안</h4>
+                <ul>
+                    <li><strong>Freemium:</strong> 기본 기록+분석 무료, PDF 출력·AI 대화 횟수에 제한</li>
+                    <li><strong>가족 연계 플랜:</strong> 월 980엔으로 최대 3명 공유 / 간병 연계자 포함</li>
+                    <li><strong>교육기관/지자체용:</strong> 도입형 라이선스 / 개별 포트폴리오 생성 툴</li>
+                </ul>
+
+                <h4>6. 🎁 부가가치 (타 일본 앱과의 차별점)</h4>
+                <ul>
+                    <li><strong>감정 기록/일기 앱 대비:</strong> ➤ ‘기능’으로서 기록되고, AI가 해석·시각화</li>
+                    <li><strong>간병용 기록 앱 대비:</strong> ➤ 사용자 본인이 기록→가시화→자산화</li>
+                    <li><strong>취업/진로 앱 대비:</strong> ➤ 일상생활 기반의 포트폴리오 작성에 특화</li>
+                </ul>
+            </div>
+
+            <div class="final-cta">
+                <h2>이제 당신의 차례입니다</h2>
+                <p>이 여정을 통해 '기능자산'이라는 새로운 가치가 발명되었습니다. 이제 당신의 일상 속 기능들을 발견하고, 기록하고, 자신만의 자산으로 만들어보세요.</p>
+            </div>
+
+        </div>
+
+        <!-- Japanese Content -->
+        <div id="content-jp" class="lang-jp">
+            
+            <!-- 1. 初期質問 -->
+            <div class="content-card">
+                <h2>ステップ1：問題提起</h2>
+                <div class="dialogue user">
+                    <span class="dialogue-label">あなたの問い</span>
+                    <p>日本であなたと対話しているアン・ギュファンが、韓国語で「機能資産」と翻訳した「Functioning」を、「生活機能」と訳しました。2010年代にどこかの論文で読んだ気がします。日本語では「生活機能」です。そこで、あなたと対話しているアン・ギュファンの「機能資産」という概念・用語・定義と、日本語の「生活機能」とを比較し、類似性、差別性、競争力、そしてアン・ギュファンの「機能資産」の市場価値を発見または発明してください。</p>
+                </div>
+            </div>
+
+            <!-- 2. 比較分析レポート -->
+            <div class="content-card">
+                <h2>ステップ2：概念比較と価値の発明</h2>
+                <div class="dialogue gpt">
+                    <span class="dialogue-label">AIからの回答</span>
+                    <p>承知いたしました。アン・ギュファン氏の「機能資産（Functioning Asset）」の概念と、日本語で使われる「生活機能」の概念を比較分析し、類似性、差別性、競争力、そして「機能資産」の日本市場における価値を中心にまとめた、詳細な比較および市場発明レポートを以下に作成します。</p>
+                </div>
+                <h3>📘 Comparative Discovery Report<br>『機能資産（Functioning Asset™）』vs『生活機能』</h3>
+                <p>– 日本語の概念との比較を通じた市場競争力と価値の発明</p>
+
+                <h4>1. 🧩 用語比較：機能資産 vs 生活機能</h4>
+                <table>
+                    <thead>
+                        <tr><th>項目</th><th>機能資産 (Functioning Asset)</th><th>生活機能 (Seikatsu Kinō)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>使用言語</td><td>韓国語、英語 (発明者：アン・ギュファン)</td><td>日本語 (リハビリ、福祉、地域保健分野)</td></tr>
+                        <tr><td>主な意味</td><td>日常の行為・感情・思考などのルーティンをAIと共に資産として記録・可視化・成長させる</td><td>食事、排泄、移動など生存のための基本的な日常動作能力</td></tr>
+                        <tr><td>アプローチ</td><td>哲学的(セン) + 生物心理社会的(ICF) + 技術的(AI, Rasch, GPT)</td><td>医学的/看護的/地域福祉の評価が中心</td></tr>
+                        <tr><td>活用目的</td><td>自己省察、AIコーチング、ESG/リハビリ/進路/ビジネス</td><td>高齢者ケア、福祉判定、リハビリ訓練</td></tr>
+                    </tbody>
+                </table>
+
+                <h4>2. ✅ 類似性</h4>
+                <ul>
+                    <li><strong>🔄 ICFベース：</strong>両概念ともWHOのICF概念を直接・間接的に内包 (機能中心の思考構造)</li>
+                    <li><strong>🧍‍♂️ 個人中心性：</strong>「機能」という表現自体が身体的能力よりも生活主体としての個人状態に集中</li>
+                    <li><strong>🧠 心理・認知を含む：</strong>単なる動きだけでなく、認知・感情・意思決定まで含もうとする傾向が存在</li>
+                </ul>
+                
+                <h4>3. 🚧 差別性</h4>
+                 <table>
+                    <thead>
+                        <tr><th>項目</th><th>生活機能 (日本)</th><th>機能資産 (アン・ギュファン)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>⚙️ 視点</td><td>保健・福祉専門家の評価が中心</td><td>個人主導 + AIによる解釈が中心</td></tr>
+                        <tr><td>📊 データ処理</td><td>チェックリスト、アンケート、看護師の記録用紙</td><td>GPT対話記録、Rasch評価、自動可視化</td></tr>
+                        <tr><td>💾 記録方式</td><td>紙ベースまたは政府システムが中心</td><td>API不要のローカル保存 / HandLoop™による手動自動化</td></tr>
+                        <tr><td>💡 ユーザー体験</td><td>医療サービスの需要者</td><td>Z世代、高齢者、創業者、資産管理参加者など多様</td></tr>
+                        <tr><td>💬 AI連携</td><td>なし</td><td>ChatGPTベースの意味生成とポートフォリオ化が可能</td></tr>
+                        <tr><td>📈 資産化</td><td>未定義 (評価目的)</td><td>ポートフォリオ、成長指標、ESG指標などとして資産化が可能</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>4. 🏁 競争力：「機能資産」だけが持つ構造的優位性</h4>
+                <ul>
+                    <li><strong>🧬 技術的拡張性：</strong>日本の「生活機能」は現場専門家中心の記録体系に留まる。「機能資産」はAI中心の解釈自動化構造、誰もが実行可能なHandLoop™ UX、Raschベースのロジット解釈を搭載。</li>
+                    <li><strong>📱 参加の拡張性：</strong>「生活機能」は保護者・介護士中心の管理。「機能資産」はZ世代から高齢者まで自発的参加を誘導可能。→特に「問い→AI対話→記録→資産化」という自己主導ループは、日本の自己啓発文化（例：自己啓発書、ノート術）と相性抜群。</li>
+                    <li><strong>📦 市場化の可能性：</strong>「機能資産」はフランチャイズ型システム、機能NFT、ESG報告などに即時適用可能。「生活機能」は概念拡張は可能だが、ビジネスモデルの構造化は不十分。</li>
+                </ul>
+
+                <h4>5. 💴 日本市場価値の予測と発明</h4>
+                 <table>
+                    <thead>
+                        <tr><th>分野</th><th>市場規模 (2025年予測)</th><th>適用可能性</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>デジタル高齢者自己管理市場</td><td>2兆円以上</td><td>「機能資産」を「自己評価＋AIコーチング」アプリに転換可能</td></tr>
+                        <tr><td>青少年自己啓発/記録市場</td><td>5,000億円以上</td><td>自己記録ノート＋GPT解釈を組み合わせた商品を発売可能</td></tr>
+                        <tr><td>ESG/CSR企業内機能測定</td><td>成長中 (非定型)</td><td>従業員の機能-情緒評価ツールとして「機能資産」を適用可能</td></tr>
+                        <tr><td>教育現場ポートフォリオ</td><td>高校/大学で急増</td><td>機能ベースの学生ポートフォリオや進路設計ツールとして拡張可能</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>6. 🧭 結論と戦略要約</h4>
+                 <ul>
+                    <li><strong>類似性：</strong>人間中心、機能ベースの構造、ICFの文脈を共有</li>
+                    <li><strong>差別性：</strong>ユーザー主導性、AI連携、資産化の可能性で優位</li>
+                    <li><strong>競争力：</strong>技術-哲学-実践をすべて統合した唯一の構造</li>
+                    <li><strong>市場機会：</strong>日本の高齢者＋青少年向けの機能記録/コーチング市場に最適化</li>
+                    <li><strong>戦略的発明：</strong>既存の「生活機能」を「生成型機能資産」へと進化させることが可能</li>
+                </ul>
+
+                 <div class="dialogue gpt" style="margin-top: 20px;">
+                    <span class="dialogue-label">次のステップのご提案</span>
+                    <p>📌 次のステップとして、以下のようなものをご提案できます：</p>
+                    <ul>
+                        <li>📄 日本語要約版（レポートまたはカード形式2p）</li>
+                        <li>🧩 日本国内でのベータテストシナリオ（Z世代または高齢者層バージョン）</li>
+                        <li>🎨 日本の生活機能システムとのマッピングポスター</li>
+                    </ul>
+                    <p>ご希望の方向性に合わせてすぐに構成いたします。どちらの方向に拡張いたしましょうか？</p>
+                </div>
+            </div>
+
+            <!-- 3. 日本語レポート生成 (요약 및 상세) -->
+            <div class="content-card">
+                <h2>ステップ3：具体化と文書化</h2>
+                <div class="dialogue user">
+                    <span class="dialogue-label">あなたのリクエスト</span>
+                    <p>日本語の要約と詳細レポートを生成してくれ。</p>
+                </div>
+                <div class="dialogue gpt">
+                    <span class="dialogue-label">AIからの回答</span>
+                    <p>承知いたしました。以下に2つの構成でご用意します。</p>
+                </div>
+
+                <h3>📄 ① 日本語要約版（1ページ要約）</h3>
+                <h4>タイトル：機能資産（Functioning Asset™）と日本の「生活機能」の比較：新たな価値の発見</h4>
+                
+                <h4>🌟 要点まとめ：</h4>
+                <table>
+                    <thead>
+                        <tr><th>観点</th><th>機能資産（Functioning Asset™）</th><th>生活機能（日本）</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>定義</td><td>日々の行動・感情・習慣をAIと共に資産として記録・分析</td><td>高齢者介護・リハビリ領域での基本生活動作能力</td></tr>
+                        <tr><td>主体</td><td>ユーザー本人 + GPT</td><td>専門職（看護師、福祉士）</td></tr>
+                        <tr><td>方法</td><td>手動自動化（HandLoop™）、GPT解釈、Rasch分析、ポートフォリオ化</td><td>アセスメント用チェックリスト中心</td></tr>
+                        <tr><td>拡張性</td><td>Z世代、起業家、フリーランス、高齢者にも展開可</td><td>医療福祉分野中心、個人参加は限定的</td></tr>
+                        <tr><td>市場適合</td><td>自己成長、就職、教育、ESG、AI連携ツールとして多分野に活用可能</td><td>ケアプラン、要介護認定用途に限定的</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>💡 発見された価値：</h4>
+                <ul>
+                    <li>日本語の「生活機能」を超えて、<strong>「生成型・自己運用型・資産化可能な生活機能」</strong>として進化</li>
+                    <li>教育・就職・リタイアメント後の人生設計に適した汎用性と拡張性</li>
+                    <li>GPT×生活習慣＝自己認識と未来設計の共創ツールへ</li>
+                </ul>
+
+                <h3>📘 ② 日本語 詳細レポート（完全版）</h3>
+                <h4>1. 背景と目的</h4>
+                <p>「生活機能（せいかつきのう）」は日本において、高齢者福祉・地域包括ケア・リハビリ領域における重要な概念です。一方、韓国のAnn Geu-hwan（アン・ギュファン）によって開発された<strong>「機能資産（Functioning Asset™）」</strong>は、生成AIと人間の協働によって、個人の生活習慣・感情・機能を日次単位で記録・可視化し、資産として運用する全く新しい概念です。本レポートでは、日本の生活機能との共通点・差異・競争優位性を明確にし、日本国内における市場価値と応用可能性を提案します。</p>
+                
+                <h4>2. 概念比較：生活機能 vs 機能資産</h4>
+                <p>（※ 上記の比較表をご参照ください）</p>
+
+                <h4>3. 相違点の戦略的意義</h4>
+                 <table>
+                    <thead>
+                        <tr><th>観点</th><th>機能資産の優位性</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>主体性</td><td>自己主導の記録と分析が可能。Z世代に特化した「問い→記録→気づき」ループあり。</td></tr>
+                        <tr><td>技術性</td><td>GPTとの対話・Raschスコアリング・機能タイムラインなど最新技術搭載。</td></tr>
+                        <tr><td>拡張性</td><td>教育・起業支援・リタイアメント支援・ESGツールとして多分野展開可能。</td></tr>
+                        <tr><td>自動化</td><td>API不要。誰でも使える「手動自動化（HandLoop™）」設計。</td></tr>
+                        <tr><td>ポートフォリオ性</td><td>自己紹介書、履歴書、キャリア形成ツールとして活用可能。</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>4. 日本市場での応用可能性</h4>
+                <table>
+                    <thead>
+                        <tr><th>ターゲット</th><th>活用例</th><th>市場規模（予測）</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>高校生・大学生</td><td>自己分析、自己紹介書、受験ポートフォリオ</td><td>数千億円規模（キャリア教育市場）</td></tr>
+                        <tr><td>高齢者</td><td>日々の自己管理、認知予防、自律型ケア記録</td><td>約2兆円（デジタルシニアケア市場）</td></tr>
+                        <tr><td>リタイア世代</td><td>第三の人生設計、自律型生涯学習</td><td>成長市場（2025以降）</td></tr>
+                        <tr><td>企業・自治体</td><td>ESG報告ツール、ウェルビーイング支援指標</td><td>拡大中（CSR/ウェルビーイング分野）</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>5. 新市場の創造提案</h4>
+                <p><strong>生活機能 × 生成AI × 手動自動化 = 日本独自の『パーソナル機能資産市場』誕生</strong></p>
+                <ul>
+                    <li>例）「生活記録ノート」×「GPT解釈」×「週次振り返りカード」＝Z世代向けメンタル・学習サポート</li>
+                    <li>例）高齢者対象「My Life Function Book」＋手動AI活用＝家族連携・自律型ケアの橋渡し</li>
+                </ul>
+
+                <h4>6. 結論と今後の展開</h4>
+                <p>Ann Geu-hwanが開発した機能資産システムは、既存の生活機能の概念を超え、自己成長・意味づけ・記録と可視化・社会貢献を一体化した新しい「人間機能モデル」です。日本では、教育・ヘルスケア・ライフプラン設計分野において大きな変革と市場創造の可能性を秘めています。</p>
+            </div>
+            
+            <!-- 4. 앱 기획서 요청 및 생성 -->
+            <div class="content-card">
+                <h2>ステップ4：実行計画への転換</h2>
+                 <div class="dialogue user">
+                    <span class="dialogue-label">あなたの最終リクエスト</span>
+                    <p>機能資産×生活機能 連携アプリ企画書 (日本ベータ版) を生成してくれ。</p>
+                </div>
+                <div class="dialogue gpt">
+                    <span class="dialogue-label">AIの最終成果物</span>
+                    <p>以下は「機能資産 × 生活機能」統合型 日本ベータ版アプリ企画書です。このアプリは、日本の高齢者、リタイア世代、若者までを対象とし、「記録–解釈–変化」を通じて、日常の生活機能を資産のように蓄積・共有できる構造を目指して設計されています。</p>
+                </div>
+
+                <h3>📱 機能資産 × 生活機能 統合型アプリ企画書（日本ベータ版）</h3>
+                
+                <h4>1. 🎯 アプリ名称（仮）</h4>
+                <p><strong>MyLife記録資産™（マイライフ キロクシサン）</strong><br>副題：「あなたの生活機能を“見える化”して“未来の価値”に変える」</p>
+
+                <h4>2. 📌 ターゲット利用者（3層構造）</h4>
+                <table>
+                    <thead>
+                        <tr><th>層</th><th>説明</th><th>利用目的</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>🎓 Z世代（高校・大学生）</td><td>自分の活動・感情・強みを記録</td><td>自己分析・進路設計・面接資料</td></tr>
+                        <tr><td>👵 シニア層（60代以降）</td><td>生活機能や感情の変化を記録</td><td>日常の自立確認、家族との共有</td></tr>
+                        <tr><td>🧑‍🏫 地域支援・教育関係者</td><td>生徒・高齢者の記録をサポート</td><td>個別指導、ケア記録、研修ツール</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>3. 🧱 機能構成（概要図）</h4>
+                <div class="code-block" style="text-align: center; font-size: 1.1em; background: #f0f7ff; color: #333; border: 1px solid #bde0ff;">
+                    [入力] → [AI解釈] → [グラフ化] → [成長ポートフォリオ] → [家族/チームと共有]
+                </div>
+
+                <h4>4. 🧩 主な機能一覧</h4>
+                 <table>
+                    <thead>
+                        <tr><th>機能名</th><th>内容</th><th>対象ユーザー</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>📔 生活機能日記</td><td>毎日の活動・気分・体調を1～3行で記録</td><td>全世代</td></tr>
+                        <tr><td>🤖 GPT分析ボタン</td><td>「これはどんな意味の機能？」と尋ねるとAIが返答</td><td>全世代</td></tr>
+                        <tr><td>📈 機能グラフ</td><td>「歩行」「会話」「感情」「判断力」などを時間軸で可視化</td><td>シニア・自己管理目的</td></tr>
+                        <tr><td>🧠 自己分析カード</td><td>強み・改善ポイントを週間レポートで自動作成</td><td>Z世代</td></tr>
+                        <tr><td>👨‍👩‍👧‍👦 家族・チーム共有</td><td>許可制で記録を他者に閲覧・フィードバック依頼可</td><td>シニア・指導者用</td></tr>
+                        <tr><td>🖨️ PDF/CSVエクスポート</td><td>週/月単位でレポート出力（医療・就活用）</td><td>全世代</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>5. 🌐 技術仕様（ローコード志向）</h4>
+                <ul>
+                    <li><strong>記録エンジン:</strong> フロントエンドにGPT-4 API（日本語対応）</li>
+                    <li><strong>ストレージ:</strong> ローカル保存またはSupabase連携（選択可能）</li>
+                    <li><strong>自動化方式:</strong> 手動自動化「HandLoop™」（Ctrl+C/Vに特化）</li>
+                    <li><strong>言語:</strong> 日本語UI＋やさしい表現（Z世代/高齢者両対応）</li>
+                    <li><strong>プラットフォーム:</strong> Webアプリ（モバイル/タブレット/PC対応）</li>
+                </ul>
+
+                <h4>6. 💴 マネタイズ案</h4>
+                <ul>
+                    <li><strong>Freemium:</strong> 基本記録＋分析無料、PDF出力・AI対話回数に制限</li>
+                    <li><strong>家族連携プラン:</strong> 月額 ¥980：最大3名で共有／介護連携者付き</li>
+                    <li><strong>教育機関・自治体向け:</strong> 導入型ライセンス／個別ポートフォリオ生成ツール</li>
+                </ul>
+
+                <h4>7. 🎁 付加価値（他の日本語アプリとの差別点）</h4>
+                <ul>
+                    <li><strong>感情記録・日記アプリに対して:</strong> ➤「機能」として記録され、AIが解釈・視覚化</li>
+                    <li><strong>介護用記録アプリに対して:</strong> ➤ユーザー本人が記録→見える化→資産化</li>
+                    <li><strong>就活/進路アプリに対して:</strong> ➤日常生活ベースのポートフォリオ作成に特化</li>
+                </ul>
+
+                <h4>✅ 結論：生活の“記録”を“資産”に変える、日本向けの新市場</h4>
+                <ul>
+                    <li>🇯🇵 日本語圏に最適化されたGPT機能分析 × 機能視覚化</li>
+                    <li>👨‍👩‍👧‍👦 世代横断の「記録文化 × 自己理解 × 家族連携」実現</li>
+                    <li>🧭 「生活機能」を“進化”させた次世代自己管理ツール</li>
+                </ul>
+            </div>
+
+            <div class="final-cta">
+                <h2>さあ、あなたの番です</h2>
+                <p>この旅を通じて、「機能資産」という新しい価値が発明されました。今度はあなたが、ご自身の日常の機能を発見し、記録し、自分だけの資産を築き上げてください。</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function switchLang(lang) {
+            const btnKo = document.getElementById('btn-ko');
+            const btnJp = document.getElementById('btn-jp');
+            const headerKo = document.getElementById('header-ko');
+            const headerJp = document.getElementById('header-jp');
+            const contentKo = document.getElementById('content-ko');
+            const contentJp = document.getElementById('content-jp');
+
+            if (lang === 'ko') {
+                btnKo.classList.add('active');
+                btnJp.classList.remove('active');
+                headerKo.style.display = 'block';
+                headerJp.style.display = 'none';
+                contentKo.style.display = 'block';
+                contentJp.style.display = 'none';
+                document.documentElement.lang = 'ko';
+            } else {
+                btnKo.classList.remove('active');
+                btnJp.classList.add('active');
+                headerKo.style.display = 'none';
+                headerJp.style.display = 'block';
+                contentKo.style.display = 'none';
+                contentJp.style.display = 'block';
+                document.documentElement.lang = 'ja';
+            }
+        }
+    </script>
+</body>
+</html>
